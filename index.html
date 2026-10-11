@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f5f1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Barevné týdny">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Barevné týdny</title>
+<style>
+:root{--bg:#f7f5f1;--card:#fff;--ink:#242321;--muted:#77736d;--line:#e7e2da;--accent:#314d3c}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:680px;margin:auto;padding:20px 16px 40px}.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.logo{width:48px;height:48px;border-radius:15px;display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:5px;background:#fff;box-shadow:0 3px 12px #0000000d}.logo i{border-radius:5px}.logo i:nth-child(1){background:#171717}.logo i:nth-child(2){background:#70472e}.logo i:nth-child(3){background:#3977e5}.logo i:nth-child(4){background:#f6c843}h1{font-size:25px;margin:0 0 3px;letter-spacing:-.6px}.sub{color:var(--muted);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:17px;margin:13px 0;box-shadow:0 3px 15px #3c302008}.eyebrow{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}.current{display:flex;justify-content:space-between;align-items:center;gap:10px}.weekbig{font-size:22px;font-weight:750;letter-spacing:-.5px}.weekrange{font-size:13px;color:var(--muted);margin-top:3px}.swatches{display:flex;gap:8px;margin-top:16px;min-height:58px}.swatch{height:58px;flex:1;border-radius:12px;border:1px solid #00000012}.empty{font-size:14px;color:var(--muted);padding:17px 0}.pill{font-size:12px;font-weight:700;background:#f1efe9;border-radius:999px;padding:7px 10px;white-space:nowrap}h2{font-size:17px;margin:0 0 12px}.fieldlabel{display:block;font-size:13px;font-weight:650;margin:13px 0 7px}select,input[type=number]{font:inherit;width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;color:var(--ink);min-height:46px}.colorgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.coloroption{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:13px;padding:10px;background:#fff;min-height:48px;font-size:14px}.coloroption input{width:18px;height:18px;accent-color:#314d3c}.dot{height:24px;width:24px;border-radius:7px;display:inline-block;flex-shrink:0;border:1px solid #00000012}.buttons{display:flex;gap:9px;margin-top:14px}.btn{font:inherit;font-weight:700;border:0;border-radius:13px;padding:13px 14px;min-height:46px;cursor:pointer}.primary{background:#314d3c;color:#fff;flex:1}.secondary{background:#f1efe9;color:#393832}.rule{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding:12px 0}.rule:first-child{border-top:0}.rulemain{flex:1;min-width:0}.ruletitle{font-weight:700;font-size:14px}.rulesub{font-size:12px;color:var(--muted);margin-top:4px}.mini{display:flex;gap:4px;align-items:center}.mini .dot{width:18px;height:18px;border-radius:5px}.delete{border:0;background:#f5eeee;color:#9a3d3d;border-radius:9px;padding:8px 10px;font-size:14px}.foot{font-size:12px;line-height:1.5;color:var(--muted);padding:4px 5px 20px}.notice{display:none;border-radius:12px;padding:11px 12px;background:#edf4ee;color:#244a30;font-size:13px;margin-top:10px}.notice.show{display:block}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+ <div class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+ <div><h1>Barevné týdny</h1><div class="sub">Barvy podle kalendářních týdnů</div></div>
+</header>
+<section class="card">
+ <div class="eyebrow">Aktuální týden</div>
+ <div class="current"><div><div class="weekbig" id="currentTitle">Týden —</div><div class="weekrange" id="currentRange"></div></div><span class="pill" id="parity">—</span></div>
+ <div class="swatches" id="currentSwatches"></div>
+ <div class="empty" id="noCurrent" hidden>Pro tento týden zatím není nastavená žádná barva.</div>
+</section>
+<section class="card">
+ <h2>1. Pravidlo pro sudé a liché týdny</h2>
+ <div class="sub">Základní pravidlo platí pro všechny týdny, které nemají vlastní výjimku.</div>
+ <label class="fieldlabel" for="paritySelect">Nastavit pravidlo</label>
+ <select id="paritySelect"><option value="odd">Liché týdny</option><option value="even">Sudé týdny</option></select>
+ <div class="fieldlabel">Zobrazované barvy (vyber jednu až čtyři)</div>
+ <div class="colorgrid" id="parityColors"></div>
+ <div class="buttons"><button class="btn primary" id="saveParity">Uložit pravidlo</button></div>
+</section>
+<section class="card">
+ <h2>2. Výjimka pro konkrétní týden</h2>
+ <div class="sub">Výjimka má přednost před pravidlem sudého nebo lichého týdne.</div>
+ <label class="fieldlabel" for="weekSelect">Číslo týdne</label>
+ <select id="weekSelect"></select>
+ <div class="fieldlabel">Zobrazované barvy</div>
+ <div class="colorgrid" id="specificColors"></div>
+ <div class="buttons"><button class="btn primary" id="saveSpecific">Uložit výjimku</button></div>
+ <div class="notice" id="notice" role="status"></div>
+</section>
+<section class="card">
+ <div class="current"><h2 style="margin:0">Nastavená pravidla</h2><button class="btn secondary" id="reset" style="padding:8px 10px;min-height:36px;font-size:12px">Obnovit výchozí</button></div>
+ <div class="sub" style="margin:8px 0 12px">Výjimky pro konkrétní týdny</div>
+ <div id="rulesList"></div>
+</section>
+<div class="foot">Číslování týdnů odpovídá ISO kalendáři (týden začíná pondělím). Nastavení se ukládá v tomto zařízení. Jde o webovou aplikaci přidatelnou na plochu, nikoli o nativní widget v systémové nabídce widgetů iOS.</div>
+</main>
+<script>
+const COLORS = {
+ black:{name:"Černá",hex:"#171717"},
+ brown:{name:"Hnědá",hex:"#70472e"},
+ blue:{name:"Modrá",hex:"#3977e5"},
+ yellow:{name:"Žlutá",hex:"#f6c843"}
+};
+const KEY="barevneTydny.v1";
+const defaults=()=>({odd:["brown"],even:["black"],overrides:{}});
+let settings=load();
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.odd&&s.even&&s.overrides)return s;}catch(e){}return defaults()}
+function persist(){localStorage.setItem(KEY,JSON.stringify(settings));render();showNotice("Nastavení bylo uloženo v tomto iPhonu.");}
+function isoWeek(date=new Date()){
+ const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+ const day=d.getUTCDay()||7; d.setUTCDate(d.getUTCDate()+4-day);
+ const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+ return Math.ceil((((d-yearStart)/86400000)+1)/7);
+}
+function weekMonday(week, year=(new Date()).getFullYear()){
+ const jan4=new Date(Date.UTC(year,0,4)); const day=jan4.getUTCDay()||7;
+ const monday=new Date(jan4); monday.setUTCDate(jan4.getUTCDate()-day+1+(week-1)*7);
+ return monday;
+}
+function fmt(d){return new Intl.DateTimeFormat("cs-CZ",{day:"numeric",month:"numeric"}).format(d)}
+function effective(week){if(Object.prototype.hasOwnProperty.call(settings.overrides,String(week)))return settings.overrides[week];return week%2===0?settings.even:settings.odd}
+function colorOptions(containerId, selected=[]){
+ const el=document.getElementById(containerId);el.innerHTML="";
+ Object.entries(COLORS).forEach(([key,c])=>{
+  const label=document.createElement("label");label.className="coloroption";
+  const input=document.createElement("input");input.type="checkbox";input.value=key;input.checked=selected.includes(key);
+  const dot=document.createElement("span");dot.className="dot";dot.style.background=c.hex;
+  const name=document.createElement("span");name.textContent=c.name;
+  label.append(input,dot,name);el.append(label);
+ });
+}
+function selectedColors(containerId){return [...document.querySelectorAll(`#${containerId} input:checked`)].map(x=>x.value)}
+function swatches(containerId,colors){
+ const el=document.getElementById(containerId);el.innerHTML="";
+ colors.forEach(key=>{const s=document.createElement("div");s.className="swatch";s.style.background=COLORS[key].hex;s.setAttribute("aria-label",COLORS[key].name);s.title=COLORS[key].name;el.append(s)});
+}
+function showNotice(msg){const el=document.getElementById("notice");el.textContent=msg;el.classList.add("show");}
+function render(){
+ const week=isoWeek();document.getElementById("currentTitle").textContent=`Týden ${week}`;
+ document.getElementById("parity").textContent=week%2===0?"SUDÝ":"LICHÝ";
+ const monday=weekMonday(week);const sunday=new Date(monday);sunday.setUTCDate(sunday.getUTCDate()+6);
+ document.getElementById("currentRange").textContent=`${fmt(monday)}–${fmt(sunday)}`;
+ const colors=effective(week);swatches("currentSwatches",colors);document.getElementById("noCurrent").hidden=colors.length>0;
+ colorOptions("parityColors",settings[document.getElementById("paritySelect").value]);
+ colorOptions("specificColors",settings.overrides[document.getElementById("weekSelect").value]||[]);
+ const list=document.getElementById("rulesList");list.innerHTML="";
+ const weeks=Object.keys(settings.overrides).map(Number).sort((a,b)=>a-b);
+ if(!weeks.length){list.innerHTML='<div class="empty">Zatím nejsou nastavené žádné výjimky.</div>';}
+ weeks.forEach(w=>{
+  const row=document.createElement("div");row.className="rule";
+  const main=document.createElement("div");main.className="rulemain";
+  const title=document.createElement("div");title.className="ruletitle";title.textContent=`Týden ${w}`;
+  const sub=document.createElement("div");sub.className="rulesub";sub.textContent="Výjimka pro konkrétní týden";
+  main.append(title,sub);
+  const mini=document.createElement("div");mini.className="mini";
+  settings.overrides[w].forEach(c=>{const dot=document.createElement("span");dot.className="dot";dot.style.background=COLORS[c].hex;dot.title=COLORS[c].name;mini.append(dot)});
+  const del=document.createElement("button");del.className="delete";del.textContent="Smazat";del.addEventListener("click",()=>{delete settings.overrides[w];persist()});
+  row.append(main,mini,del);list.append(row);
+ });
+}
+document.getElementById("paritySelect").addEventListener("change",render);
+document.getElementById("weekSelect").addEventListener("change",render);
+document.getElementById("saveParity").addEventListener("click",()=>{
+ const colors=selectedColors("parityColors");if(!colors.length){showNotice("Vyber alespoň jednu barvu.");return}
+ settings[document.getElementById("paritySelect").value]=colors;persist();
+});
+document.getElementById("saveSpecific").addEventListener("click",()=>{
+ const week=document.getElementById("weekSelect").value,colors=selectedColors("specificColors");
+ if(!colors.length){showNotice("Vyber alespoň jednu barvu. Pokud chceš výjimku zrušit, použij Smazat v přehledu.");return}
+ settings.overrides[week]=colors;persist();
+});
+document.getElementById("reset").addEventListener("click",()=>{
+ if(confirm("Opravdu obnovit výchozí pravidla? Vlastní výjimky se smažou.")){settings=defaults();persist();}
+});
+for(let w=1;w<=53;w++){const o=document.createElement("option");o.value=w;o.textContent=`Týden ${w}`;document.getElementById("weekSelect").append(o)}
+render();
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
+</script>
+</body>
+</html>
